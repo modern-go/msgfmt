@@ -7,6 +7,7 @@ import (
 	"unsafe"
 	"fmt"
 	"github.com/modern-go/reflect2"
+	"github.com/modern-go/parse"
 )
 
 var bufPool = &sync.Pool{
@@ -73,5 +74,13 @@ func Sscanf(str string, format string, kvObj ...interface{}) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return scanner.Scan([]byte(str), kv)
+	src := parse.NewSourceString(str)
+	n := scanner.Scan(src, kv)
+	if src.Error() == io.EOF {
+		return n, nil
+	}
+	if src.Error() != nil {
+		return n, err
+	}
+	return n, nil
 }

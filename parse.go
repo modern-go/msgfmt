@@ -72,9 +72,8 @@ func (token *leftCurlyToken) PrefixParse(src *parse.Source) interface{} {
 	if isId {
 		obj = token.lexer.parseVariable(src, id)
 	}
-	rightFormatter := obj.(Formatter)
 	src.Consume1('}')
-	return rightFormatter
+	return obj
 }
 
 type literalToken struct {
