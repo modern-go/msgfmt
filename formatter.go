@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/modern-go/msgfmt/jsonfmt"
 	"github.com/modern-go/reflect2"
+	"github.com/modern-go/concurrent"
 )
 
 type Formatter interface {
@@ -64,7 +65,7 @@ var toFormatter = newLexer(func(l *lexer) {
 		return formatter
 	}
 	l.parseLiteral = func(src *parse.Source, literal string) interface{} {
-		return fixedFormatter(literal)
+		return literalFormatter(literal)
 	}
 	l.merge = func(left interface{}, right interface{}) interface{} {
 		formatters, isFormatters := left.(Formatters)
@@ -85,7 +86,19 @@ func findValueIndex(sample []interface{}, target string) int {
 	return -1
 }
 
-func compile(format string, sample []interface{}) Formatter {
+var formatterCache = concurrent.NewMap()
+
+func FormatterOf(format string, sample []interface{}) Formatter {
+	formatterObj, found := formatterCache.Load(format)
+	if found {
+		return formatterObj.(Formatter)
+	}
+	formatter := formatterOf(format, sample)
+	formatterCache.Store(format, formatter)
+	return formatter
+}
+
+func formatterOf(format string, sample []interface{}) Formatter {
 	src := parse.NewSourceString(format)
 	src.Attachment = sample
 	formatter := toFormatter.Parse(src, 0)

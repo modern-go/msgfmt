@@ -6,7 +6,6 @@ import (
 	"sync"
 	"unsafe"
 	"fmt"
-	"github.com/modern-go/concurrent"
 	"github.com/modern-go/reflect2"
 )
 
@@ -67,14 +66,12 @@ func fprintf(writer io.Writer, format string, kv []interface{}) (int, error) {
 	return n, err
 }
 
-var formatterCache = concurrent.NewMap()
-
-func FormatterOf(format string, sample []interface{}) Formatter {
-	formatterObj, found := formatterCache.Load(format)
-	if found {
-		return formatterObj.(Formatter)
+func Sscanf(str string, format string, kvObj ...interface{}) (int, error) {
+	ptr := reflect2.NoEscape(unsafe.Pointer(&kvObj))
+	kv := *(*[]interface{})(ptr)
+	scanner, err := ScannerOf(format, kv)
+	if err != nil {
+		return 0, err
 	}
-	formatter := compile(format, sample)
-	formatterCache.Store(format, formatter)
-	return formatter
+	return scanner.Scan([]byte(str), kv)
 }
