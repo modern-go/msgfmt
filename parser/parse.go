@@ -1,26 +1,26 @@
-package msgfmt
+package parser
 
 import (
 	"github.com/modern-go/parse"
 	"unicode"
 	"github.com/modern-go/parse/read"
-	"github.com/modern-go/parse/skip"
 	"errors"
+	"github.com/modern-go/parse/discard"
 )
 
-type lexer struct {
+type Lexer struct {
 	leftCurly     *leftCurlyToken
 	literal       *literalToken
 	variable      *variableLexer
 	formatter     *formatterLexer
 	merge         func(left interface{}, right interface{}) interface{}
-	parseLiteral  func(src *parse.Source, literal string) interface{}
-	parseVariable func(src *parse.Source, id string) interface{}
-	parseFunc     func(src *parse.Source, id string, funcName string, funcArgs []string) interface{}
+	ParseLiteral  func(src *parse.Source, literal string) interface{}
+	ParseVariable func(src *parse.Source, id string) interface{}
+	ParseFunc     func(src *parse.Source, id string, funcName string, funcArgs []string) interface{}
 }
 
-func newLexer(initLexer func(l *lexer)) *lexer {
-	l := &lexer{
+func NewLexer(initLexer func(l *Lexer)) *Lexer {
+	l := &Lexer{
 		leftCurly: &leftCurlyToken{},
 		literal:   &literalToken{},
 		variable:  newVariableLexer(),
@@ -33,7 +33,7 @@ func newLexer(initLexer func(l *lexer)) *lexer {
 	return l
 }
 
-func (lexer *lexer) Parse(src *parse.Source, precedence int) interface{} {
+func (lexer *Lexer) Parse(src *parse.Source, precedence int) interface{} {
 	var left interface{}
 	for src.Error() == nil {
 		if left == nil {
@@ -45,7 +45,7 @@ func (lexer *lexer) Parse(src *parse.Source, precedence int) interface{} {
 	return left
 }
 
-func (lexer *lexer) PrefixToken(src *parse.Source) parse.PrefixToken {
+func (lexer *Lexer) PrefixToken(src *parse.Source) parse.PrefixToken {
 	switch src.Peek()[0] {
 	case '{':
 		return lexer.leftCurly
@@ -54,12 +54,12 @@ func (lexer *lexer) PrefixToken(src *parse.Source) parse.PrefixToken {
 	}
 }
 
-func (lexer *lexer) InfixToken(src *parse.Source) (parse.InfixToken, int) {
+func (lexer *Lexer) InfixToken(src *parse.Source) (parse.InfixToken, int) {
 	return nil, 0
 }
 
 type leftCurlyToken struct {
-	lexer *lexer
+	lexer *Lexer
 }
 
 func (token *leftCurlyToken) PrefixParse(src *parse.Source) interface{} {
@@ -70,18 +70,18 @@ func (token *leftCurlyToken) PrefixParse(src *parse.Source) interface{} {
 	}
 	id, isId := obj.(string)
 	if isId {
-		obj = token.lexer.parseVariable(src, id)
+		obj = token.lexer.ParseVariable(src, id)
 	}
 	src.Consume1('}')
 	return obj
 }
 
 type literalToken struct {
-	lexer *lexer
+	lexer *Lexer
 }
 
 func (token *literalToken) PrefixParse(src *parse.Source) interface{} {
-	return token.lexer.parseLiteral(src, string(read.AnyExcept1(src, nil, '{')))
+	return token.lexer.ParseLiteral(src, string(read.AnyExcept1(src, nil, '{')))
 }
 
 // {VAR,
@@ -99,12 +99,12 @@ func newVariableLexer() *variableLexer {
 }
 
 func (lexer *variableLexer) PrefixToken(src *parse.Source) parse.PrefixToken {
-	skip.UnicodeSpace(src)
+	discard.UnicodeSpace(src)
 	return lexer.id
 }
 
 func (lexer *variableLexer) InfixToken(src *parse.Source) (parse.InfixToken, int) {
-	skip.UnicodeSpace(src)
+	discard.UnicodeSpace(src)
 	switch src.Peek()[0] {
 	case ',':
 		return lexer.comma, parse.DefaultPrecedence
@@ -130,13 +130,13 @@ func (token *idToken) PrefixParse(src *parse.Source) interface{} {
 }
 
 type commaToken struct {
-	lexer *lexer
+	lexer *Lexer
 }
 
 func (token *commaToken) InfixParse(src *parse.Source, left interface{}) interface{} {
 	src.Consume1(',')
 	funcInvocation := parse.Parse(src, token.lexer.formatter, 0).(funcInvocation)
-	return token.lexer.parseFunc(src, left.(string), funcInvocation.name, funcInvocation.args)
+	return token.lexer.ParseFunc(src, left.(string), funcInvocation.name, funcInvocation.args)
 }
 
 // {VAR, FORMATTER,
@@ -151,7 +151,7 @@ func newFormatterLexer() *formatterLexer {
 }
 
 func (lexer *formatterLexer) PrefixToken(src *parse.Source) parse.PrefixToken {
-	skip.UnicodeSpace(src)
+	discard.UnicodeSpace(src)
 	buf, _ := src.PeekN(6)
 	str := string(buf)
 	switch str {
@@ -169,7 +169,7 @@ func (lexer *formatterLexer) InfixToken(src *parse.Source) (parse.InfixToken, in
 }
 
 type funcNameToken struct {
-	lexer *lexer
+	lexer *Lexer
 }
 
 type funcInvocation struct {
@@ -181,7 +181,7 @@ func (token *funcNameToken) PrefixParse(src *parse.Source) interface{} {
 	name := string(read.AnyExcept2(src, nil, ',', '}'))
 	var args []string
 	for {
-		skip.UnicodeSpace(src)
+		discard.UnicodeSpace(src)
 		switch src.Peek1() {
 		case ',':
 			src.Consume1(',')
