@@ -32,4 +32,7 @@ func TestFormatter(t *testing.T) {
 		output = msgfmt.Sprintf("hello {var}", "var", "world")
 		must.Equal("hello world", output)
 	}))
+	t.Run("variable not found", test.Case(func(ctx context.Context) {
+		msgfmt.Sprintf("hello {var}")
+	}))
 }

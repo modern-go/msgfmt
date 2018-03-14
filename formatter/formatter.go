@@ -52,7 +52,7 @@ func parseVariable(src *parse.Source, id string) interface{} {
 	sample := src.Attachment.([]interface{})
 	position := findKey(sample, id)
 	if position == -1 {
-		panic("not implemented")
+		return invalid(id + " not found in arguments")
 	}
 	val := sample[position]
 	return formatterOf(position, val)

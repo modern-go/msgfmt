@@ -13,6 +13,9 @@ type jsonFormatter struct {
 }
 
 func (formatter *jsonFormatter) Format(space []byte, kv []interface{}) []byte {
+	if formatter.position >= len(kv) {
+		return space
+	}
 	stream := formatter.cfg.BorrowStream(nil)
 	val := kv[formatter.position]
 	ptr := reflect2.PtrOf(val)
