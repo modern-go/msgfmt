@@ -6,6 +6,7 @@ import (
 	"github.com/modern-go/parse/read"
 	"errors"
 	"github.com/modern-go/parse/discard"
+	"github.com/modern-go/msgfmt/parser/ast"
 )
 
 type Lexer struct {
@@ -13,10 +14,18 @@ type Lexer struct {
 	literal       *literalToken
 	variable      *variableLexer
 	formatter     *formatterLexer
-	merge         func(left interface{}, right interface{}) interface{}
+	Merge         func(left interface{}, right interface{}) interface{}
 	ParseLiteral  func(src *parse.Source, literal string) interface{}
 	ParseVariable func(src *parse.Source, id string) interface{}
 	ParseFunc     func(src *parse.Source, id string, funcName string, funcArgs []string) interface{}
+}
+
+func NewAstLexer() *Lexer {
+	return NewLexer(func(l *Lexer) {
+		l.ParseLiteral = ast.ParseLiteral
+		l.ParseVariable = ast.ParseVariable
+		l.Merge = ast.Merge
+	})
 }
 
 func NewLexer(initLexer func(l *Lexer)) *Lexer {
@@ -39,7 +48,7 @@ func (lexer *Lexer) Parse(src *parse.Source, precedence int) interface{} {
 		if left == nil {
 			left = parse.Parse(src, lexer, precedence)
 		} else {
-			left = lexer.merge(left, parse.Parse(src, lexer, precedence))
+			left = lexer.Merge(left, parse.Parse(src, lexer, precedence))
 		}
 	}
 	return left

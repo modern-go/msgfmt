@@ -7,16 +7,23 @@ import (
 	"github.com/modern-go/parse"
 	"github.com/modern-go/msgfmt/parser"
 	"github.com/modern-go/test/must"
+	"github.com/modern-go/msgfmt/parser/ast"
 )
 
 func TestLexer(t *testing.T) {
 	t.Run("literal", test.Case(func(ctx context.Context) {
 		src := parse.NewSourceString("hello")
-		result := parse.Parse(src, parser.NewLexer(func(l *parser.Lexer) {
-			l.ParseLiteral = func(src *parse.Source, literal string) interface{} {
-				return literal
-			}
-		}), 0)
-		must.Equal("hello", result)
+		lexer := parser.NewAstLexer()
+		result := lexer.Parse(src, 0)
+		must.Equal(ast.Literal("hello"), result)
+	}))
+	t.Run("variable", test.Case(func(ctx context.Context) {
+		src := parse.NewSourceString("hello {world}")
+		lexer := parser.NewAstLexer()
+		result := lexer.Parse(src, 0)
+		must.Equal(ast.Format{
+			ast.Literal("hello "),
+			ast.Variable("world"),
+		}, result)
 	}))
 }
