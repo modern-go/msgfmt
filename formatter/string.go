@@ -3,6 +3,9 @@ package formatter
 type stringFormatter int
 
 func (position stringFormatter) Format(space []byte, kv []interface{}) []byte {
-	val := kv[position].(string)
+	val, isString := kv[position].(string)
+	if !isString {
+		return formatterOf(int(position), kv[position]).Format(space, kv)
+	}
 	return append(space, val...)
 }

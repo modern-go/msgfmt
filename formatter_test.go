@@ -26,4 +26,10 @@ func TestFormatter(t *testing.T) {
 		output := msgfmt.Sprintf("hello {var}", "var", 100)
 		must.Equal("hello 100", output)
 	}))
+	t.Run("variable type might change", test.Case(func(ctx context.Context) {
+		output := msgfmt.Sprintf("hello {var}", "var", 100)
+		must.Equal("hello 100", output)
+		output = msgfmt.Sprintf("hello {var}", "var", "world")
+		must.Equal("hello world", output)
+	}))
 }

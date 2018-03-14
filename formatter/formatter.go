@@ -55,13 +55,18 @@ func parseVariable(src *parse.Source, id string) interface{} {
 		panic("not implemented")
 	}
 	val := sample[position]
+	return formatterOf(position, val)
+}
+
+func formatterOf(position int, val interface{}) Formatter {
 	switch val.(type) {
 	case string:
 		return stringFormatter(position)
 	default:
 		cfg := jsoniter.ConfigDefault
 		encoder := cfg.EncoderOf(reflect2.TypeOf(val))
-		return &jsonFormatter{position, encoder, cfg}
+		encoderKey := reflect2.RTypeOf(val)
+		return &jsonFormatter{position, encoder, encoderKey, cfg}
 	}
 }
 

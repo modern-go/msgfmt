@@ -6,16 +6,21 @@ import (
 )
 
 type jsonFormatter struct {
-	position int
-	encoder jsoniter.ValEncoder
-	pool jsoniter.StreamPool
+	position   int
+	encoder    jsoniter.ValEncoder
+	encoderKey uintptr
+	cfg        jsoniter.API
 }
 
 func (formatter *jsonFormatter) Format(space []byte, kv []interface{}) []byte {
-	stream := formatter.pool.BorrowStream(nil)
-	ptr := reflect2.PtrOf(kv[formatter.position])
+	stream := formatter.cfg.BorrowStream(nil)
+	val := kv[formatter.position]
+	ptr := reflect2.PtrOf(val)
+	if reflect2.RTypeOf(val) != formatter.encoderKey {
+		return formatterOf(formatter.position, val).Format(space, kv)
+	}
 	formatter.encoder.Encode(ptr, stream)
 	output := append(space, stream.Buffer()...)
-	formatter.pool.ReturnStream(stream)
+	formatter.cfg.ReturnStream(stream)
 	return output
 }
