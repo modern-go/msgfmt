@@ -3,6 +3,8 @@ package formatter
 import (
 	"github.com/modern-go/msgfmt/parser"
 	"github.com/modern-go/parse"
+	"github.com/json-iterator/go"
+	"github.com/modern-go/reflect2"
 )
 
 type Formatter interface {
@@ -57,7 +59,9 @@ func parseVariable(src *parse.Source, id string) interface{} {
 	case string:
 		return stringFormatter(position)
 	default:
-		panic("not implemented")
+		cfg := jsoniter.ConfigDefault
+		encoder := cfg.EncoderOf(reflect2.TypeOf(val))
+		return &jsonFormatter{position, encoder, cfg}
 	}
 }
 

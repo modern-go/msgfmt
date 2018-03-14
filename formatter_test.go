@@ -22,4 +22,8 @@ func TestFormatter(t *testing.T) {
 			"var2", "!")
 		must.Equal("hello world!", output)
 	}))
+	t.Run("variable of integer", test.Case(func(ctx context.Context) {
+		output := msgfmt.Sprintf("hello {var}", "var", 100)
+		must.Equal("hello 100", output)
+	}))
 }
