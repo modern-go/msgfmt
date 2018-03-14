@@ -24,6 +24,7 @@ func NewAstLexer() *Lexer {
 	return NewLexer(func(l *Lexer) {
 		l.ParseLiteral = ast.ParseLiteral
 		l.ParseVariable = ast.ParseVariable
+		l.ParseFunc = ast.ParseFunc
 		l.Merge = ast.Merge
 	})
 }

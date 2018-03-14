@@ -26,4 +26,17 @@ func TestLexer(t *testing.T) {
 			ast.Variable("world"),
 		}, result)
 	}))
+	t.Run("func", test.Case(func(ctx context.Context) {
+		src := parse.NewSourceString("hello {world, goTime, Mon Jan _2 15:04:05 2006}")
+		lexer := parser.NewAstLexer()
+		result := lexer.Parse(src, 0)
+		must.Equal(ast.Format{
+			ast.Literal("hello "),
+			ast.Func{
+				"world",
+				"goTime",
+				[]string{" Mon Jan _2 15:04:05 2006"},
+			},
+		}, result)
+	}))
 }
