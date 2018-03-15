@@ -3,8 +3,6 @@ package formatter
 import (
 	"github.com/modern-go/msgfmt/parser"
 	"github.com/modern-go/parse"
-	"github.com/json-iterator/go"
-	"github.com/modern-go/reflect2"
 	"github.com/modern-go/concurrent"
 )
 
@@ -90,14 +88,11 @@ func parseVariable(src *parse.Source, id string) interface{} {
 func formatterOf(position int, val interface{}) Formatter {
 	switch val.(type) {
 	case string:
-		return stringFormatter(position)
+		return newStringFormatter(position)
 	case []byte:
-		return binaryFormatter(position)
+		return newBinaryFormatter(position)
 	default:
-		cfg := jsoniter.ConfigDefault
-		encoder := cfg.EncoderOf(reflect2.TypeOf(val))
-		encoderKey := reflect2.RTypeOf(val)
-		return &jsonFormatter{position, encoder, encoderKey, cfg}
+		return newJsonFormatter(position, val)
 	}
 }
 

@@ -5,25 +5,23 @@ import (
 	"github.com/modern-go/reflect2"
 )
 
-type jsonFormatter struct {
-	position   int
-	encoder    jsoniter.ValEncoder
-	encoderKey uintptr
-	cfg        jsoniter.API
-}
-
-func (formatter *jsonFormatter) Format(space []byte, kv []interface{}) []byte {
-	if formatter.position >= len(kv) {
-		return space
-	}
-	stream := formatter.cfg.BorrowStream(nil)
-	val := kv[formatter.position]
-	ptr := reflect2.PtrOf(val)
-	if reflect2.RTypeOf(val) != formatter.encoderKey {
-		return formatterOf(formatter.position, val).Format(space, kv)
-	}
-	formatter.encoder.Encode(ptr, stream)
-	output := append(space, stream.Buffer()...)
-	formatter.cfg.ReturnStream(stream)
-	return output
+func newJsonFormatter(position int, sampleVal interface{}) Formatter {
+	cfg := jsoniter.ConfigDefault
+	encoder := cfg.EncoderOf(reflect2.TypeOf(sampleVal))
+	encoderKey := reflect2.RTypeOf(sampleVal)
+	return FuncFormatter(func(space []byte, kv []interface{}) []byte {
+		if position >= len(kv) {
+			return space
+		}
+		stream := cfg.BorrowStream(nil)
+		val := kv[position]
+		ptr := reflect2.PtrOf(val)
+		if reflect2.RTypeOf(val) != encoderKey {
+			return formatterOf(position, val).Format(space, kv)
+		}
+		encoder.Encode(ptr, stream)
+		output := append(space, stream.Buffer()...)
+		cfg.ReturnStream(stream)
+		return output
+	})
 }
