@@ -1,9 +1,9 @@
 package formatter
 
 import (
+	"github.com/modern-go/concurrent"
 	"github.com/modern-go/msgfmt/parser"
 	"github.com/modern-go/parse"
-	"github.com/modern-go/concurrent"
 )
 
 var funcRegistry = concurrent.NewMap()

@@ -1,8 +1,8 @@
 package scanner
 
 import (
-	"regexp"
 	"github.com/modern-go/parse"
+	"regexp"
 )
 
 func parseLiteral(src *parse.Source, literal string) interface{} {

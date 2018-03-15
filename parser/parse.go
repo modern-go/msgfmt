@@ -1,12 +1,12 @@
 package parser
 
 import (
-	"github.com/modern-go/parse"
-	"unicode"
-	"github.com/modern-go/parse/read"
 	"errors"
-	"github.com/modern-go/parse/discard"
 	"github.com/modern-go/msgfmt/parser/ast"
+	"github.com/modern-go/parse"
+	"github.com/modern-go/parse/discard"
+	"github.com/modern-go/parse/read"
+	"unicode"
 )
 
 type Lexer struct {

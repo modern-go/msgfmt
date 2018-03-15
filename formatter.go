@@ -1,8 +1,8 @@
 package msgfmt
 
 import (
-	"github.com/modern-go/msgfmt/formatter"
 	"github.com/modern-go/concurrent"
+	"github.com/modern-go/msgfmt/formatter"
 )
 
 var formatterCache = concurrent.NewMap()

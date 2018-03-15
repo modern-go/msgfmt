@@ -7,7 +7,7 @@ type Literal string
 type Variable string
 
 type Func struct {
-	Id string
+	Id       string
 	FuncName string
 	FuncArgs []string
 }
@@ -16,7 +16,7 @@ type Token interface{}
 
 type Format []interface{}
 
-func ParseLiteral(src *parse.Source, literal string) interface{}{
+func ParseLiteral(src *parse.Source, literal string) interface{} {
 	return Literal(literal)
 }
 
@@ -29,7 +29,7 @@ func ParseFunc(src *parse.Source, id string, funcName string, funcArgs []string)
 }
 
 func Merge(left interface{}, right interface{}) interface{} {
-	leftFormat, _  := left.(Format)
+	leftFormat, _ := left.(Format)
 	if leftFormat != nil {
 		return append(leftFormat, right)
 	}

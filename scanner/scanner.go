@@ -1,12 +1,12 @@
 package scanner
 
 import (
-	"regexp"
 	"errors"
+	"fmt"
 	"github.com/modern-go/msgfmt/parser"
 	"github.com/modern-go/parse"
-	"fmt"
 	"io"
+	"regexp"
 )
 
 type Scanner interface {

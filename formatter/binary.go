@@ -1,8 +1,8 @@
 package formatter
 
 import (
-	"unicode/utf8"
 	"unicode"
+	"unicode/utf8"
 )
 
 const hex = "0123456789abcdef"

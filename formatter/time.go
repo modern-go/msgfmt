@@ -1,8 +1,8 @@
 package formatter
 
 import (
-	"time"
 	"strings"
+	"time"
 )
 
 func init() {
@@ -27,13 +27,12 @@ func (f *goTime) FormatterOf(funcArgs []string, sample []interface{}, id string)
 	layout := strings.TrimSpace(funcArgs[0])
 	return FuncFormatter(func(space []byte, kv []interface{}) []byte {
 		if position >= len(kv) {
-			return invalid(id + " not found").Format(space, kv)
+			return invalid(id+" not found").Format(space, kv)
 		}
 		val, isTime := kv[position].(time.Time)
 		if !isTime {
-			return invalid(id + " is not time").Format(space, kv)
+			return invalid(id+" is not time").Format(space, kv)
 		}
 		return append(space, val.Format(layout)...)
 	})
 }
-

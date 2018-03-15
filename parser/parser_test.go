@@ -1,13 +1,13 @@
 package parser_test
 
 import (
-	"testing"
-	"github.com/modern-go/test"
 	"context"
-	"github.com/modern-go/parse"
 	"github.com/modern-go/msgfmt/parser"
-	"github.com/modern-go/test/must"
 	"github.com/modern-go/msgfmt/parser/ast"
+	"github.com/modern-go/parse"
+	"github.com/modern-go/test"
+	"github.com/modern-go/test/must"
+	"testing"
 )
 
 func TestLexer(t *testing.T) {
