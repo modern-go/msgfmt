@@ -6,6 +6,7 @@ import (
 	"context"
 	"github.com/modern-go/test/must"
 	"github.com/modern-go/msgfmt"
+	"time"
 )
 
 func TestFormatter(t *testing.T) {
@@ -42,5 +43,11 @@ func TestFormatter(t *testing.T) {
 		must.Equal(`hello \x01\x02\x03`, output)
 		output = msgfmt.Sprintf("hello {var}", "var", []byte{0xc3, 0x28})
 		must.Equal(`hello \xc3(`, output)
+	}))
+	t.Run("func", test.Case(func(ctx context.Context) {
+		epoch := time.Unix(0, 0).In(time.UTC)
+		output := msgfmt.Sprintf("hello {var, goTime, Mon Jan _2 15:04:05 2006}",
+			"var", epoch)
+		must.Equal("hello Thu Jan  1 00:00:00 1970", output)
 	}))
 }

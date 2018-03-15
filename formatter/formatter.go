@@ -5,10 +5,28 @@ import (
 	"github.com/modern-go/parse"
 	"github.com/json-iterator/go"
 	"github.com/modern-go/reflect2"
+	"github.com/modern-go/concurrent"
 )
+
+var funcRegistry = concurrent.NewMap()
 
 type Formatter interface {
 	Format(space []byte, kv []interface{}) []byte
+}
+
+type Func interface {
+	FuncName() string
+	FormatterOf(funcArgs []string, sample []interface{}, id string) Formatter
+}
+
+func RegisterFunc(f Func) {
+	funcRegistry.Store(f.FuncName(), f)
+}
+
+type FuncFormatter func(space []byte, kv []interface{}) []byte
+
+func (f FuncFormatter) Format(space []byte, kv []interface{}) []byte {
+	return f(space, kv)
 }
 
 func Of(formatStr string, sample []interface{}) Formatter {
@@ -23,6 +41,7 @@ func newFormatterLexer() *parser.Lexer {
 	return parser.NewLexer(func(l *parser.Lexer) {
 		l.ParseLiteral = parseLiteral
 		l.ParseVariable = parseVariable
+		l.ParseFunc = parseFunc
 		l.Merge = merge
 	})
 }
@@ -46,6 +65,16 @@ func (formatters formatters) Format(space []byte, kv []interface{}) []byte {
 
 func parseLiteral(src *parse.Source, str string) interface{} {
 	return literal(str)
+}
+
+func parseFunc(src *parse.Source, id string, funcName string, funcArgs []string) interface{} {
+	funcObj, found := funcRegistry.Load(funcName)
+	if !found {
+		return invalid("func " + funcName + " not registered")
+	}
+	sample := src.Attachment.([]interface{})
+	formatter := funcObj.(Func).FormatterOf(funcArgs, sample, id)
+	return formatter
 }
 
 func parseVariable(src *parse.Source, id string) interface{} {
