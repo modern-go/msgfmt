@@ -64,7 +64,7 @@ func (formatters formatters) Format(space []byte, kv []interface{}) []byte {
 }
 
 func parseLiteral(src *parse.Source, str string) interface{} {
-	return literal(str)
+	return literalFormatter(str)
 }
 
 func parseFunc(src *parse.Source, id string, funcName string, funcArgs []string) interface{} {

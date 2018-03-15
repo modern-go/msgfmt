@@ -1,7 +1,7 @@
 package formatter
 
-type literal string
+type literalFormatter string
 
-func (l literal) Format(space []byte, kv []interface{}) []byte {
+func (l literalFormatter) Format(space []byte, kv []interface{}) []byte {
 	return append(space, l...)
 }

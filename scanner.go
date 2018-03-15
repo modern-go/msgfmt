@@ -3,5 +3,9 @@ package msgfmt
 import "github.com/modern-go/msgfmt/scanner"
 
 func Sscanf(str string, format string, kv ...interface{}) error {
-	return scanner.Of(format, kv).Scan([]byte(str), kv)
+	scanner, err := scanner.Of(format, kv)
+	if err != nil {
+		return err
+	}
+	return scanner.Scan([]byte(str), kv)
 }
