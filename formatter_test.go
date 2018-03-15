@@ -35,4 +35,12 @@ func TestFormatter(t *testing.T) {
 	t.Run("variable not found", test.Case(func(ctx context.Context) {
 		msgfmt.Sprintf("hello {var}")
 	}))
+	t.Run("variable of bytes", test.Case(func(ctx context.Context) {
+		output := msgfmt.Sprintf("hello {var}", "var", []byte("world"))
+		must.Equal("hello world", output)
+		output = msgfmt.Sprintf("hello {var}", "var", []byte{1,2,3})
+		must.Equal(`hello \x01\x02\x03`, output)
+		output = msgfmt.Sprintf("hello {var}", "var", []byte{0xc3, 0x28})
+		must.Equal(`hello \xc3(`, output)
+	}))
 }

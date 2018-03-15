@@ -62,6 +62,8 @@ func formatterOf(position int, val interface{}) Formatter {
 	switch val.(type) {
 	case string:
 		return stringFormatter(position)
+	case []byte:
+		return binaryFormatter(position)
 	default:
 		cfg := jsoniter.ConfigDefault
 		encoder := cfg.EncoderOf(reflect2.TypeOf(val))
