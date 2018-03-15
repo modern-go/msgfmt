@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func TestFormatter(t *testing.T) {
+func TestSprintf(t *testing.T) {
 	t.Run("literal", test.Case(func(ctx context.Context) {
 		must.Equal("hello", msgfmt.Sprintf("hello", nil))
 	}))
