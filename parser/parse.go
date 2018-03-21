@@ -73,7 +73,7 @@ type leftCurlyToken struct {
 }
 
 func (token *leftCurlyToken) PrefixParse(src *parse.Source) interface{} {
-	src.Consume1('{')
+	src.Expect1('{')
 	obj := parse.Parse(src, token.lexer.variable, 0)
 	if src.Error() != nil {
 		return nil
@@ -82,7 +82,7 @@ func (token *leftCurlyToken) PrefixParse(src *parse.Source) interface{} {
 	if isId {
 		obj = token.lexer.ParseVariable(src, id)
 	}
-	src.Consume1('}')
+	src.Expect1('}')
 	return obj
 }
 
@@ -144,7 +144,7 @@ type commaToken struct {
 }
 
 func (token *commaToken) InfixParse(src *parse.Source, left interface{}) interface{} {
-	src.Consume1(',')
+	src.Expect1(',')
 	funcInvocation := parse.Parse(src, token.lexer.formatter, 0).(funcInvocation)
 	return token.lexer.ParseFunc(src, left.(string), funcInvocation.name, funcInvocation.args)
 }
@@ -194,7 +194,7 @@ func (token *funcNameToken) PrefixParse(src *parse.Source) interface{} {
 		discard.UnicodeSpace(src)
 		switch src.Peek1() {
 		case ',':
-			src.Consume1(',')
+			src.Expect1(',')
 			args = append(args, string(read.AnyExcept2(src, nil, ',', '}')))
 		case '}':
 			return funcInvocation{name, args}

@@ -32,6 +32,9 @@ func Of(formatStr string, sample []interface{}) Formatter {
 	src := parse.NewSourceString(formatStr)
 	src.Attachment = sample
 	formatter := lexer.Parse(src, 0).(Formatter)
+	if src.FatalError() != nil {
+		return invalid("parse msgfmt failed: " + src.FatalError().Error())
+	}
 	return formatter
 }
 
@@ -48,6 +51,9 @@ func merge(left interface{}, right interface{}) interface{} {
 	leftAsFormatters, _ := left.(formatters)
 	if leftAsFormatters != nil {
 		return append(leftAsFormatters, right.(Formatter))
+	}
+	if right == nil {
+		return left
 	}
 	return formatters{left.(Formatter), right.(Formatter)}
 }
@@ -72,6 +78,9 @@ func parseFunc(src *parse.Source, id string, funcName string, funcArgs []string)
 	}
 	sample := src.Attachment.([]interface{})
 	formatter := funcObj.(Func).FormatterOf(funcArgs, sample, id)
+	if formatter == nil {
+		return invalid("func " + funcName + " did not provide formatter")
+	}
 	return formatter
 }
 
