@@ -91,7 +91,7 @@ type literalToken struct {
 }
 
 func (token *literalToken) PrefixParse(src *parse.Source) interface{} {
-	return token.lexer.ParseLiteral(src, string(read.AnyExcept1(src, nil, '{')))
+	return token.lexer.ParseLiteral(src, string(read.AnyExcept1(src, '{')))
 }
 
 // {VAR,
@@ -135,7 +135,7 @@ var patternWhiteSpaceAndPatternSyntax = []*unicode.RangeTable{
 }
 
 func (token *idToken) PrefixParse(src *parse.Source) interface{} {
-	runes := read.UnicodeRanges(src, nil, nil, patternWhiteSpaceAndPatternSyntax)
+	runes := read.UnicodeRanges(src, nil, patternWhiteSpaceAndPatternSyntax)
 	return string(runes)
 }
 
@@ -188,14 +188,14 @@ type funcInvocation struct {
 }
 
 func (token *funcNameToken) PrefixParse(src *parse.Source) interface{} {
-	name := string(read.AnyExcept2(src, nil, ',', '}'))
+	name := string(read.AnyExcept2(src, ',', '}'))
 	var args []string
 	for {
 		discard.UnicodeSpace(src)
 		switch src.Peek1() {
 		case ',':
 			src.Expect1(',')
-			args = append(args, string(read.AnyExcept2(src, nil, ',', '}')))
+			args = append(args, string(read.AnyExcept2(src, ',', '}')))
 		case '}':
 			return funcInvocation{name, args}
 		default:
