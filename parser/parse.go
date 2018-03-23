@@ -162,7 +162,7 @@ func newFormatterLexer() *formatterLexer {
 
 func (lexer *formatterLexer) PrefixToken(src *parse.Source) parse.PrefixToken {
 	discard.UnicodeSpace(src)
-	buf, _ := src.PeekN(6)
+	buf := src.PeekN(6)
 	str := string(buf)
 	switch str {
 	case "select":
